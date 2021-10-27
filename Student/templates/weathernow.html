@@ -1,0 +1,449 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		
+		<title>Weather Now</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.10.2/css/all.css">
+		<script src="{% static 'jquery-3.3.1.min.js' %}"></script>
+		<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" href="{% static 'weather.css' %}">
+		
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	</head>
+
+	<body>
+
+		<div id="info">
+			<h1 style='font-size:50px'>Weather Station<i class="fas fa-cloud"></i></h1>
+			<span>{{time}}</span>
+		</div>
+		<div class="weather">
+			<div class="temp">
+				<h3><i class="fas fa-temperature-high"></i> Temperature:</h3>
+				{% if weather.light <= 50 and weather.water <= 0 %}
+				<span>{{weather.light}}F°<i class="fas fa-cloud-moon"></i> </span>
+				{% elif weather.light <= 50 and weather.water > 0%}
+				<span>{{weather.light}} <i class="fas fa-cloud-moon-rain"></i></span>
+				{% elif weather.light > 50 and weather.water <= 0 %}
+				<span>{{weather.light}}F° <i class="fas fa-cloud-sun"></i> </span>
+				{% elif weather.light > 50 and weather.water > 0 %}
+				<span>{{weather.light}}F° <i class="fas fa-cloud-sun-rain"></i> </span>
+				{% endif %}
+			</div>
+			<div class="hum">
+				<h3><i class="fas fa-tint"></i> Humidity:</h3>
+				<span>{{weather.humidity}}</span>
+			</div>
+			<div class="rain">
+				<h3><i class="fas fa-tint"></i> Rainy:</h3>
+				{% if  weather.water > 0 %}
+					<span>YES!!</span>
+				{% else %}
+					<span>NO!!</span>
+				{% endif %}
+			</div>
+			<div class="rain">
+				<h3><i class="fas fa-street-view"></i> Location:</h3>
+				{% if  weather.ip == "127.0.0.1" %}
+					<span>HOME</span>
+				{% else %}
+					<span>{{weather.ip}}</span>
+				{% endif %}
+			</div>
+		</div>
+		<div id="rowcanvas" class="row">
+			<canvas id="myChart"></canvas>
+		</div>
+		<div id="select">
+			<select name="" id="selectselect">
+				<option data-chart="lightpush" value="temp">Temp</option>
+				<option data-chart="humiditydata" value="humidity">humidity</option>
+			</select>
+		</div>
+
+		<script src="{%static '/three.min.js' %}"></script>
+		<script src="{%static '/GLTFLoader.js' %}"></script>
+
+		<script src="{%static '/WebGL.js' %}"></script>
+
+		<script>
+
+			if ( WEBGL.isWebGLAvailable() === false ) {
+
+				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+
+			}
+			var container, stats, loader;
+
+			var camera, scene, renderer;
+
+			var mesh;
+
+			var textureLoader;
+
+			var spotLight;
+
+			var mouseX = 0;
+			var mouseY = 0;
+
+			var targetX = 0;
+			var targetY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				//
+				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 1200;
+				// camera.position.z = 5000;
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x1e1e1e );
+
+				// LIGHTS
+
+				// scene.add( new THREE.HemisphereLight( 0x484858, 0x000008, 0.2 ) );
+				// scene.add( new THREE.HemisphereLight( 0x484858, 0x000008, 1.5 ) );
+
+				// spotLight = new THREE.SpotLight( 0xeeeeff, 0.8 );
+				spotLight = new THREE.SpotLight( 0xeeeeff, 0.8 );
+				spotLight.position.set( 0.5, 0, 1 );
+				spotLight.position.multiplyScalar( 700 );
+				scene.add( spotLight );
+
+				spotLight.castShadow = true;
+
+				spotLight.shadow.mapSize.width = 2048;
+				spotLight.shadow.mapSize.height = 2048;
+
+				spotLight.shadow.camera.near = 200;
+				spotLight.shadow.camera.far = 1500;
+
+				spotLight.shadow.camera.fov = 40;
+
+				spotLight.shadow.bias = - 0.005;
+
+				//cubemap
+				var format = '.jpg';
+
+				var path = "{%static 'textures/cube/stars/face-' %}";
+				var urls = [
+					path + 'r' + format, path + 'l' + format,
+					path + 't' + format, path + 'd' + format,
+					path + 'f' + format, path + 'b' + format
+				];
+
+				var reflectionCube = new THREE.CubeTextureLoader().load( urls );
+				reflectionCube.format = THREE.RGBFormat;
+				scene.background = reflectionCube;
+
+				//
+				textureLoader = new THREE.TextureLoader();
+
+				var bumpMap = textureLoader.load( "{% static '/textures/moon/bump.jpg' %}" );
+				var texture = textureLoader.load( "{% static  '/textures/moon/diffuse.jpg'%}" );
+
+				var material = new THREE.MeshPhongMaterial( {
+					color: 0xFFFFFF,
+					// specular: 0x0,
+					specular: 0x000000,
+					emissive: 0x010101,
+					shininess: 0,
+					// side: THREE.BackSide,
+					// wireframe: true,
+					map: texture,
+					bumpMap: bumpMap,
+					bumpScale: 12,
+					// normalMap: normalMap,
+					// normalScale: new THREE.Vector2( 0.8, 0.8 ),
+					// envMap: scene.background,
+				} );
+
+				loader = new THREE.GLTFLoader();
+				loader.load( "{% static '/models/moon.glb' %}" , function ( gltf ) {
+					console.log(gltf);
+					createScene( gltf.scene.children[ 0 ].geometry, 120, material );
+					// createScene( geometry, 100, material );
+				} );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				renderer.shadowMap.enabled = true;
+
+				//
+
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+
+				// EVENTS
+
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function createScene( geometry, scale, material ) {
+
+
+				mesh = new THREE.Mesh( geometry, material );
+
+				// mesh.position.y = - 50;
+				// mesh.position.y = - 20;
+				mesh.scale.set( scale, scale, scale );
+				mesh.rotation.y -= 20;
+
+				mesh.castShadow = true;
+				mesh.receiveShadow = true;
+
+				scene.add( mesh );
+
+			}
+
+			//
+
+			function onWindowResize() {
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+			}
+
+			function onDocumentMouseMove( event ) {
+
+				mouseX = ( event.clientX - windowHalfX );
+				mouseY = ( event.clientY - windowHalfY );
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			function render() {
+
+				targetX = mouseX * .5;
+				targetY = mouseY * .5;
+
+				if ( mesh ) {
+					mesh.rotation.y += 0.0011;
+				}
+
+				camera.position.x += ( mouseX - camera.position.x );
+				camera.position.y += ( mouseY - camera.position.y );
+				camera.lookAt( scene.position );
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+	
+<script>
+	var dataarraylight='{{dataarraylight}}'
+	var labellight = '{{labelvaluesArr}}'
+	var humvaluesArr= '{{humvaluesArr}}'
+	
+	var lightpush=[]
+	var labels=[]
+	var humiditydata=[]
+	var splitedarr = dataarraylight.split(",")
+	var splitedarr1 = labellight.split(",")
+	var splitedhim = humvaluesArr.split(",")
+
+	for(var splited = 0; splited<splitedarr.length; splited++){
+		valuepush = splitedarr[splited].replace("[","")
+		valuepush1=splitedarr1[splited].replace("[","")
+		humiditypush= splitedhim[splited].replace("[","")
+		labels.push(parseFloat(valuepush1))
+		lightpush.push(parseFloat(valuepush))
+		humiditydata.push(humiditypush)
+		
+	}
+	
+	
+	var mydata={
+		"lightpush":lightpush,
+		"humiditydata":humiditydata
+	}
+	
+//     const labels = [
+//   'January',
+//   'February',
+//   'March',
+//   'April',
+//   'May',
+//   'June',
+// ];
+var selectedoption= false
+var clickedoptiontime=0
+document.querySelectorAll("#selectselect option").forEach(ele=>
+	ele.addEventListener("click",function(){
+		clickedoptiontime++;
+		console.log(mydata["humiditydata"])
+
+		var selected= this.dataset.chart
+		const data = {
+		labels: labels,
+		datasets: [{
+			label: 'Temp',
+			backgroundColor: 'rgb(255, 99, 132)',
+			borderColor: 'rgb(255, 129, 132)',
+			data:mydata[selected] ,
+		}]
+		};
+		const config = {
+		type: 'line',
+		data: data,
+		options: {}
+		};
+
+		
+		var myChart=''
+		if(clickedoptiontime == 1){
+			myChart = new Chart(
+			document.getElementById('myChart'),
+			config
+		);
+		}else{
+			document.getElementById('myChart').remove();
+			var canvas=document.createElement("canvas");
+			canvas.setAttribute("id","myChart");
+			var rowcanvas=document.getElementById("rowcanvas");
+			rowcanvas.appendChild(canvas)
+
+			myChart = new Chart(
+			document.getElementById('myChart'),
+			config
+		);
+		}
+		
+		selectedoption=true
+}))
+
+
+// 	const data = {
+//   labels: labels,
+//   datasets: [{
+//     label: 'Temp',
+//     backgroundColor: 'rgb(255, 99, 132)',
+//     borderColor: 'rgb(255, 129, 132)',
+//     data: lightpush,
+//   }]
+// };
+// const config = {
+//   type: 'line',
+//   data: data,
+//   options: {}
+// };
+// const myChart = new Chart(
+//     document.getElementById('myChart'),
+//     config
+//   );
+
+
+    
+// === include 'setup' then 'config' above ===
+
+
+</script>
+<!-- 
+<script>
+	$(window).click(function(){
+		com="com4";
+		fill_graph_sensor(com);
+	});
+	
+	
+	function fill_graph_sensor(){
+			var dps = []; // dataPoints
+	var chart = new CanvasJS.Chart("chartContainer", {
+		animationEnabled: true,
+		title: {
+			text: "Live Data from Arduino connected with sensor"
+		},
+		axisX: {
+			title: "Time"
+		},
+		axisY: {
+			title: "data",
+			suffix: ""
+		},
+		data: [{
+			type: "line",
+			name: "CPU Utilization",
+			connectNullData: true,
+			//nullDataLineDashType: "solid",
+			xValueType: "dateTime",
+			xValueFormatString: "DD MMM hh:mm TT",
+			yValueFormatString: "#,##0.##\"mm\"",
+			dataPoints: dps
+		}]
+	});
+	
+	var xVal = 0;
+	var yVal = 100;
+	var updateInterval = 3000;//miliseconds
+	var dataLength = 20; // number of dataPoints visible at any point
+	
+	var updateChart = function () {
+	
+		$.ajax({
+				type:"get",
+				url: "{% url 'Student:fetch_sensor_values_ajax' %}",
+				data: {
+						 'id': com
+					   },
+				success: function(data) {
+					console.log(data);
+					// for(index = 0; index < data.result.length; index++) {
+					//     var str_array = data.result[index].split(',');
+					//     dps.push({
+					//         x: Date.parse(str_array[1]),
+					//         y: Number(str_array[0])
+					//     });
+					//    }
+					// return data;
+						},
+				error: function(){
+						console.log("error he ji");
+					 }
+				});
+	
+		if (dps.length > dataLength) {
+			dps.shift();
+		}
+	
+		chart.render();
+	};
+	
+	updateChart(dataLength);
+	setInterval(function(){updateChart()}, updateInterval);
+	}
+	</script> -->
+
+	</body>
+</html>

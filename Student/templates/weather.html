@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  {% load static %}
+<link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'font-awesome.css' %}"> 
+<script src="{% static 'bootstrap.min.js' %}"></script>
+</head>
+<body>
+<div class="container">
+<center><h1>Live Graph</h1></center>
+<hr>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-4"><label>Enter Com Port:</label></div>
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="col-md-4">
+                    <input name="key" type="text" class="form-control col-md-2" name="com" id="comport">
+                </div>
+                <div class="col-md-4">
+                    <input type="submit" name="submit" id="btn_show" class="btn btn-primary">
+                </div>
+            </form>
+        </div>
+    </div>
+     
+<br><br>
+<hr/>
+<div class="row">
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+</div>
+
+</div>
+</body>
+
+<script src="{% static 'jquery-3.3.1.min.js' %}"></script>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script>
+  
+//csrf token 
+function getToken(name){
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== ''){
+        var cookies = document.cookie.split(';');
+        for(var i=0; i<cookies.length; i++){
+            var cookie = cookies[i].trim()
+            //does this cookie begins with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')){
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+
+}
+var csrftoken = getToken('csrftoken')
+
+    document.getElementById("btn_show").addEventListener('click',function(){
+        console.log('fdf')
+        update(document.getElementById("comport").value)
+    })
+
+    
+    function update(keyy){
+    url="/update/"
+    
+    fetch(url,{
+        method:"POST",
+        headers:{
+            "content-type":"application/json",
+            "X-CSRFToken":csrftoken
+        },
+        body: JSON.stringify({
+            "key":keyy,
+            
+        })
+    })
+    .then((response)=>{
+        return response.json()
+    })
+    .then((data)=>{
+        //
+        
+
+        console.log(data)
+        
+       
+
+        //
+    })
+}
+</script>
+
+</html>
