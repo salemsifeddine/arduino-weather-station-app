@@ -92,17 +92,20 @@ def weathernow(request,template_name="weathernow.html"):
     hour=datetime.datetime.now().hour
     lightvaluesArr=[]
     labelvaluesArr=[]
+    runvals=[]
     humvaluesArr=[]
     for lighval in Weather.objects.all():
         lightvaluesArr.append(lighval.light)
         humvaluesArr.append(lighval.humidity)
+        
         intlabel=f"{lighval.time_occured.hour}.{lighval.time_occured.minute}{lighval.time_occured.second}"
+        runvals.append({float(intlabel),lighval.water})
         labelvaluesArr.append(float(intlabel))
 
     
+   
 
-
-    context={"weather":weather, 'time':datetime.datetime.today(),'hour':int(hour),
+    context={"weather":weather, 'time':datetime.datetime.today(),'hour':int(hour),"rain":runvals,
     'dataarraylight':lightvaluesArr,"labelvaluesArr":labelvaluesArr,"humvaluesArr":humvaluesArr}
     return render(request,template_name,context)
 

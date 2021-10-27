@@ -17,54 +17,60 @@
 
 	<body>
 
-		<div id="info">
-			<h1 style='font-size:50px'>Weather Station<i class="fas fa-cloud"></i></h1>
-			<span>{{time}}</span>
-		</div>
-		<div class="weather">
-			<div class="temp">
-				<h3><i class="fas fa-temperature-high"></i> Temperature:</h3>
-				{% if weather.light <= 50 and weather.water <= 0 %}
-				<span>{{weather.light}}F°<i class="fas fa-cloud-moon"></i> </span>
-				{% elif weather.light <= 50 and weather.water > 0%}
-				<span>{{weather.light}} <i class="fas fa-cloud-moon-rain"></i></span>
-				{% elif weather.light > 50 and weather.water <= 0 %}
-				<span>{{weather.light}}F° <i class="fas fa-cloud-sun"></i> </span>
-				{% elif weather.light > 50 and weather.water > 0 %}
-				<span>{{weather.light}}F° <i class="fas fa-cloud-sun-rain"></i> </span>
-				{% endif %}
+		<div class="first">
+			<div id="info">
+				<h1 style='font-size:50px'>Weather Station<i class="fas fa-cloud"></i></h1>
+				<span>{{time}}</span>
 			</div>
-			<div class="hum">
-				<h3><i class="fas fa-tint"></i> Humidity:</h3>
-				<span>{{weather.humidity}}</span>
+			<div class="weather">
+				<div class="temp">
+					<h3><i class="fas fa-temperature-high"></i> Temperature:</h3>
+					{% if weather.light <= 50 and weather.water <= 0 %}
+					<span>{{weather.light}}F°<i class="fas fa-cloud-moon"></i> </span>
+					{% elif weather.light <= 50 and weather.water > 0%}
+					<span>{{weather.light}} <i class="fas fa-cloud-moon-rain"></i></span>
+					{% elif weather.light > 50 and weather.water <= 0 %}
+					<span>{{weather.light}}F° <i class="fas fa-cloud-sun"></i> </span>
+					{% elif weather.light > 50 and weather.water > 0 %}
+					<span>{{weather.light}}F° <i class="fas fa-cloud-sun-rain"></i> </span>
+					{% endif %}
+				</div>
+				<div class="hum">
+					<h3><i class="fas fa-tint"></i> Humidity:</h3>
+					<span>{{weather.humidity}}</span>
+				</div>
+				<div class="rain">
+					<h3><i class="fas fa-tint"></i> Rainy:</h3>
+					{% if  weather.water > 0 %}
+						<span>YES!!</span>
+					{% else %}
+						<span>NO!!</span>
+					{% endif %}
+				</div>
+				<div class="rain">
+					<h3><i class="fas fa-street-view"></i> Location:</h3>
+					{% if  weather.ip == "127.0.0.1" %}
+						<span>HOME</span>
+					{% else %}
+						<span>{{weather.ip}}</span>
+					{% endif %}
+				</div>
 			</div>
-			<div class="rain">
-				<h3><i class="fas fa-tint"></i> Rainy:</h3>
-				{% if  weather.water > 0 %}
-					<span>YES!!</span>
-				{% else %}
-					<span>NO!!</span>
-				{% endif %}
+			
+			<div id="select">
+				<select name="" id="selectselect">
+					<option data-type="line" data-chart="lightpush" value="temp">Temp</option>
+					<option data-type="line" data-chart="humiditydata" value="humidity">humidity</option>
+					<option data-type="scatter" data-chart="rain" value="humidity">Rain</option>
+				</select>
 			</div>
-			<div class="rain">
-				<h3><i class="fas fa-street-view"></i> Location:</h3>
-				{% if  weather.ip == "127.0.0.1" %}
-					<span>HOME</span>
-				{% else %}
-					<span>{{weather.ip}}</span>
-				{% endif %}
-			</div>
-		</div>
-		<div id="rowcanvas" class="row">
-			<canvas id="myChart"></canvas>
-		</div>
-		<div id="select">
-			<select name="" id="selectselect">
-				<option data-chart="lightpush" value="temp">Temp</option>
-				<option data-chart="humiditydata" value="humidity">humidity</option>
-			</select>
 		</div>
 
+		<div class="second">
+			<div id="rowcanvas" class="row">
+				<canvas id="myChart"></canvas>
+			</div>
+		</div>
 		<script src="{%static '/three.min.js' %}"></script>
 		<script src="{%static '/GLTFLoader.js' %}"></script>
 
@@ -74,7 +80,7 @@
 
 			if ( WEBGL.isWebGLAvailable() === false ) {
 
-				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+				document.querySelector(".first").appendChild( WEBGL.getWebGLErrorMessage() );
 
 			}
 			var container, stats, loader;
@@ -102,7 +108,7 @@
 			function init() {
 
 				container = document.createElement( 'div' );
-				document.body.appendChild( container );
+				document.querySelector(".first").appendChild( container );
 
 				//
 				camera = new THREE.PerspectiveCamera( 27, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -266,28 +272,35 @@
 	var dataarraylight='{{dataarraylight}}'
 	var labellight = '{{labelvaluesArr}}'
 	var humvaluesArr= '{{humvaluesArr}}'
+	var rainvaluesArr= '{{rain}}'
 	
 	var lightpush=[]
 	var labels=[]
 	var humiditydata=[]
+	var rain=[]
+
 	var splitedarr = dataarraylight.split(",")
 	var splitedarr1 = labellight.split(",")
 	var splitedhim = humvaluesArr.split(",")
+	var splitedrain = rainvaluesArr.split(",")
 
 	for(var splited = 0; splited<splitedarr.length; splited++){
 		valuepush = splitedarr[splited].replace("[","")
 		valuepush1=splitedarr1[splited].replace("[","")
 		humiditypush= splitedhim[splited].replace("[","")
+		rainpush= rainvaluesArr[splited].replace("[","")
+
 		labels.push(parseFloat(valuepush1))
 		lightpush.push(parseFloat(valuepush))
 		humiditydata.push(humiditypush)
-		
+		rain.push(rainpush)
 	}
 	
 	
 	var mydata={
 		"lightpush":lightpush,
-		"humiditydata":humiditydata
+		"humiditydata":humiditydata,
+		"rain":rain
 	}
 	
 //     const labels = [
@@ -303,7 +316,7 @@ var clickedoptiontime=0
 document.querySelectorAll("#selectselect option").forEach(ele=>
 	ele.addEventListener("click",function(){
 		clickedoptiontime++;
-		console.log(mydata["humiditydata"])
+		
 
 		var selected= this.dataset.chart
 		const data = {
@@ -316,7 +329,7 @@ document.querySelectorAll("#selectselect option").forEach(ele=>
 		}]
 		};
 		const config = {
-		type: 'line',
+		type: this.dataset.type ,
 		data: data,
 		options: {}
 		};
