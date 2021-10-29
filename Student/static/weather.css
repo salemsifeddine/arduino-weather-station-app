@@ -1,49 +1,82 @@
-/* body {
-    background:#000;
-    color:#fff;
-    padding:0;
+*{
     margin:0;
-    font-weight: bold;
-    overflow:hidden;
+    padding:0;
+    box-sizing: border-box;
 }
-
-a {	color: #ffffff;	}
-
-#info {
-    position: absolute;
-    bottom: 15px;
+body{
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+.mm li{
+    list-style: none;
+    margin-right: 10px;
+    margin-left:50px;
+    display: inline;
+    background-color: yellowgreen;
+    cursor: pointer;
+}
+/* main{
+    height: 100vh;
+} */
+.main {
+    margin-top:70px;
+    margin-left:15%;
+    width:70%;
+    height: calc(60vh + 7px);
+    
+}
+.main div{
+    
+    width: 33%;
+    height: 20vh;
+    
+    display: inline-block;
+}
+.mobile{
+    background-color: coral;
+}
+.phone{
+    background-color: crimson;
+}
+.myul{
     width: 100%;
-    color: #ffffff;
-    padding: 0;
-    font-size: 32px;
-    z-index: 1000;
-    letter-spacing: 30px;
-    font-weight: 100;
-    text-align: right;
-    font-family: "Montserrat", sans-serif;
-    opacity: 0.5;
-}
-
-#webglmessage {
-    background:rgb(200,100,0) !important;
-    color:#fff;
-}
-
-#vt { display:none }
-#vt, #vt a { color:orange; } */
-
-
-
-body {
-    background:#000;
-    color:#fff;
-    padding:0;
-    margin:0;
-    font-weight: bold;
-    overflow:hidden;
+    height: 10vh;
+    background-color: rgba(47, 79, 79, 0.671);
+    color: white;
+    font-family: sans-serif;
+    font-size: 17px;
+    position: fixed;   
+    top:0;
+    left:0;
+    line-height: 10vh;
+    text-align: center;
     
 }
 
+
+
+.hi{
+    
+    height:100vh;
+    width:100%;
+    background-color:#EEE;
+  
+    margin-bottom: 5px;
+}
+
+.circle{
+    width: 30px;
+    height: 30px;
+    border-radius:50%;
+    background-color:blue;
+    position: absolute;
+    bottom:50px;
+    right:50px
+}
+.circle i{
+    font-size: 30px;
+    color:#fff
+}
 
 
 a {	color: #ffffff;	}
@@ -71,19 +104,21 @@ a {	color: #ffffff;	}
 #vt, #vt a { color:orange; }
 .weather{
     width:400px;
-    height:80vh;
+    min-height:40vh;
     user-select: none;
-    position: fixed;
-    top:20vh;
-    right: 0;
     padding:10px;
+    position:absolute;
+    right:0px;
+    top:10vh
    
 }
 .weather div{
     display: flex;
     border-bottom: 1px solid #333;
-    align-items: center;
-    justify-content: space-around
+    margin-bottom: 20px;
+    height: 40px;
+    justify-content: space-around;
+    color: #fff
 }
 #info h1 i{
     color: #f0f0f0;
@@ -100,13 +135,11 @@ a {	color: #ffffff;	}
 
 }
 
-#select{
-    position: absolute;
-    z-index: 99999;
-    top: 30px;
-    left: 10px
+/* #select{
     
-}
+   
+    
+} */
 
 #selectselect{
     background-color: transparent;
@@ -119,3 +152,26 @@ a {	color: #ffffff;	}
     font-size:16px;
 }
 
+
+/* .first{
+    width: 50vw;
+    height: 50vh;
+    position:absolute;
+    top:0;
+    right: 0 
+} */
+
+#rowcanvas{
+    width: 50vw;
+    height: 50vh;
+    position:absolute;
+    top:45vh;
+    left:10px
+}
+
+#chartContainer{
+    width: 90%;
+    height: 80vh;
+    margin:auto;
+    padding-top:10vh
+}
