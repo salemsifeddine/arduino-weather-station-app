@@ -1,5 +1,7 @@
 from .models import *
 import serial
+from pyfirmata import Arduino, util
+import time
 objectd={}
 
 def get_ip(request):
@@ -41,3 +43,35 @@ def data_arduino(request):
     weather, created= Weather.objects.get_or_create(light=lightvalue, humidity=humvalue
     ,water=int(water),ip=ip)
     weather.save()
+
+
+def roboticarm(request):
+    
+
+
+   
+   
+
+    # board.analog[0].disable_reporting()
+
+    
+    board = Arduino('com5')
+    time.sleep(2)
+    board.analog[0].write(50) 
+
+    # Change to your port
+
+
+
+    # while True:
+    #     it = util.Iterator(board)
+
+    #     it.start()
+    #     board.analog[0].enable_reporting()
+    #     tv1 = board.analog[0]
+    #     time.sleep(1)
+    #     print(tv1.read()* (1580/2))
+       
+
+  
+   

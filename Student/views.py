@@ -74,7 +74,12 @@ def fetch_sensor_values_ajax(request):
             pass
         
         data['result']=realarray
+        
     else:
         data['result']='Not Ajax'
     return JsonResponse(data)
 
+
+def robot(request):
+    roboticarm(request)
+    return render(request, "robotic_arm.html")
